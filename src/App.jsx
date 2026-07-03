@@ -2,121 +2,92 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import {
   ArrowRight,
+  CalendarDays,
   ChevronRight,
-  Clock,
-  Gem,
-  Heart,
-  MapPin,
   Menu,
-  Phone,
-  Search,
-  ShoppingBag,
+  Moon,
+  Send,
   Sparkles,
   Star,
-  Store,
   X,
 } from "lucide-react";
+import heroImage from "./assets/midnight-meridian-hero.png";
 
 const navItems = [
-  ["Collections", "#collections"],
-  ["Visit", "#visit"],
-  ["Preview", "#preview"],
-  ["Contact", "#contact"],
+  ["Route", "#route"],
+  ["Cabins", "#cabins"],
+  ["Atlas", "#atlas"],
+  ["Reserve", "#reserve"],
 ];
 
-const collections = [
+const routeStops = [
   {
-    title: "Jewelry",
-    detail: "Silver rings, gemstone pendants, bracelets, earrings, and everyday pieces with a little mystery.",
-    accent: "from-amber-300 to-rose-300",
-    tags: ["rings", "pendants", "silver", "bracelets", "earrings"],
+    name: "Lamplight Platform",
+    altitude: "1,840m",
+    detail: "Board beside wet stone, brass lanterns, and the first star charts of the evening.",
+    accent: "#d7ae63",
+    x: -3.2,
+    y: -1.2,
   },
   {
-    title: "Crystals",
-    detail: "Tumbled stones, display specimens, altar pieces, and small gifts chosen for color and texture.",
-    accent: "from-teal-300 to-sky-300",
-    tags: ["stones", "specimens", "altar", "gems", "display"],
+    name: "Vesper Ridge",
+    altitude: "2,560m",
+    detail: "A slow climb through dark pine, with the lounge glass angled toward the Milky Way.",
+    accent: "#74c3c7",
+    x: -1.15,
+    y: 1.25,
   },
   {
-    title: "Beads",
-    detail: "Strands, charms, findings, and inspiration for makers building something personal.",
-    accent: "from-violet-300 to-fuchsia-300",
-    tags: ["strands", "charms", "findings", "makers", "craft"],
+    name: "The Meridian Cut",
+    altitude: "2,910m",
+    detail: "The train pauses where the sky is cleanest and the telescope salon opens.",
+    accent: "#f4e6c8",
+    x: 1.0,
+    y: 0.2,
   },
   {
-    title: "Gifts",
-    detail: "Clothing, incense, ritual goods, and curious objects for thoughtful browsing.",
-    accent: "from-lime-200 to-emerald-300",
-    tags: ["clothing", "incense", "ritual", "prayer", "scarves"],
-  },
-];
-
-const storeNotes = [
-  "Eclectic jewelry, beads, crystals, clothing, gifts, and prayer goods",
-  "Independent Lincoln storefront on O Street",
-  "Made for browsing, gifting, and finding one uncommon piece",
-];
-
-const visitModes = [
-  {
-    name: "Browse",
-    label: "Slow discovery",
-    copy: "Start with jewelry trays, crystals, and handmade-feeling gift shelves.",
-    color: "#c4862c",
-  },
-  {
-    name: "Gift",
-    label: "Quick ideas",
-    copy: "Use the shop as a fast stop for incense, stones, charms, and small surprises.",
-    color: "#075f63",
-  },
-  {
-    name: "Make",
-    label: "Creative supplies",
-    copy: "Lean into beads, charms, findings, and pieces for custom projects.",
-    color: "#582547",
+    name: "Dawn Terminal",
+    altitude: "1,470m",
+    detail: "Breakfast arrives as the observatory car rolls into blue hour and lower air.",
+    accent: "#c9503f",
+    x: 3.1,
+    y: -1.0,
   },
 ];
 
-const reviews = [
-  "A local shop preview with more personality than a standard jewelry template.",
-  "Warm, tactile, and easy to scan before deciding to stop in.",
-  "Clear location details with collections that match the actual store identity.",
+const cabinTypes = [
+  {
+    name: "Glass Berth",
+    capacity: "Sleeps 2",
+    copy: "A compact suite with a tilting sky window, velvet bench, and brass reading rail.",
+    details: ["Private washroom", "Ceiling star shade", "Midnight tea service"],
+  },
+  {
+    name: "Atlas Suite",
+    capacity: "Sleeps 3",
+    copy: "A wider cabin built around a chart desk, foldaway berth, and ridge-facing sofa.",
+    details: ["Chart desk", "Panoramic sofa", "Guide call button"],
+  },
+  {
+    name: "The North Room",
+    capacity: "Sleeps 4",
+    copy: "The end-car residence with curved glass, a small library, and private dining.",
+    details: ["End-car glass", "Private dinner", "Telescope priority"],
+  },
 ];
 
-function AmbientBackground() {
-  useEffect(() => {
-    const root = document.documentElement;
-    let frame = 0;
+const manifest = [
+  ["01", "Board after sunset", "A concierge checks bags while guides mark the night sky over the platform."],
+  ["02", "Observe in motion", "The glass lounge tracks the route as constellations pass over each ridge."],
+  ["03", "Wake below dawn", "Coffee, notebooks, and mountain light arrive before the final station."],
+];
 
-    const handlePointerMove = (event) => {
-      cancelAnimationFrame(frame);
-
-      frame = requestAnimationFrame(() => {
-        root.style.setProperty("--cursor-x", `${(event.clientX / window.innerWidth) * 100}%`);
-        root.style.setProperty("--cursor-y", `${(event.clientY / window.innerHeight) * 100}%`);
-      });
-    };
-
-    window.addEventListener("pointermove", handlePointerMove);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("pointermove", handlePointerMove);
-    };
-  }, []);
-
-  return (
-    <div className="ambient-background" aria-hidden="true">
-      <span className="cursor-glow" />
-      <span className="ambient-stone stone-one" />
-      <span className="ambient-stone stone-two" />
-      <span className="ambient-stone stone-three" />
-      <span className="ambient-thread thread-one" />
-      <span className="ambient-thread thread-two" />
-    </div>
-  );
-}
+const departures = [
+  "New moon weekend",
+  "Perseid week",
+  "Equinox crossing",
+  "Private charter",
+];
 
 function Reveal({ children, className = "", delay = 0 }) {
   const ref = useRef(null);
@@ -135,7 +106,7 @@ function Reveal({ children, className = "", delay = 0 }) {
           observer.unobserve(element);
         }
       },
-      { rootMargin: "0px 0px -12% 0px", threshold: 0.12 },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.12 },
     );
 
     observer.observe(element);
@@ -154,191 +125,18 @@ function Reveal({ children, className = "", delay = 0 }) {
   );
 }
 
-function ThreeCrystalShowcase({ activeMode }) {
-  const mountRef = useRef(null);
-
-  useEffect(() => {
-    const mount = mountRef.current;
-
-    if (!mount) {
-      return undefined;
-    }
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-    camera.position.set(0, 0.7, 6);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
-    mount.appendChild(renderer.domElement);
-
-    const group = new THREE.Group();
-    scene.add(group);
-
-    const crystalMaterial = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(activeMode.color),
-      metalness: 0.05,
-      roughness: 0.18,
-      transmission: 0.18,
-      thickness: 0.7,
-      clearcoat: 1,
-      clearcoatRoughness: 0.12,
-      ior: 1.45,
-    });
-
-    const accentMaterial = new THREE.MeshStandardMaterial({
-      color: 0xf7c46b,
-      metalness: 0.75,
-      roughness: 0.24,
-    });
-
-    const stoneMaterials = [
-      new THREE.MeshPhysicalMaterial({ color: 0xf0dbff, roughness: 0.22, clearcoat: 0.65 }),
-      new THREE.MeshPhysicalMaterial({ color: 0xb2ece7, roughness: 0.18, clearcoat: 0.7 }),
-      new THREE.MeshPhysicalMaterial({ color: 0xffd9a0, roughness: 0.28, clearcoat: 0.55 }),
-    ];
-
-    const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(1.18, 0), crystalMaterial);
-    crystal.scale.set(1, 1.45, 1);
-    crystal.rotation.set(0.32, 0.46, 0.08);
-    group.add(crystal);
-
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.58, 0.055, 18, 96), accentMaterial);
-    ring.rotation.x = Math.PI / 2.08;
-    ring.rotation.z = 0.2;
-    group.add(ring);
-
-    const orbit = new THREE.Group();
-    group.add(orbit);
-
-    const stoneGeometry = new THREE.IcosahedronGeometry(0.18, 1);
-    const orbitStones = Array.from({ length: 9 }, (_, index) => {
-      const material = stoneMaterials[index % stoneMaterials.length];
-      const stone = new THREE.Mesh(stoneGeometry, material);
-      const angle = (index / 9) * Math.PI * 2;
-      stone.position.set(Math.cos(angle) * 1.95, Math.sin(angle) * 0.62, Math.sin(angle) * 1.3);
-      stone.scale.setScalar(index % 2 ? 0.78 : 1);
-      orbit.add(stone);
-      return stone;
-    });
-
-    const base = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.9, 2.2, 0.16, 80),
-      new THREE.MeshStandardMaterial({
-        color: 0x2f1d1a,
-        metalness: 0.12,
-        roughness: 0.45,
-      }),
-    );
-    base.position.y = -1.85;
-    base.rotation.y = 0.18;
-    group.add(base);
-
-    scene.add(new THREE.AmbientLight(0xfff2dc, 1.25));
-
-    const keyLight = new THREE.PointLight(new THREE.Color(activeMode.color), 4.2, 12);
-    keyLight.position.set(2.7, 2.2, 3.4);
-    scene.add(keyLight);
-
-    const rimLight = new THREE.PointLight(0xffffff, 2.8, 10);
-    rimLight.position.set(-2.5, 1.7, 2.6);
-    scene.add(rimLight);
-
-    let pointerX = 0;
-    let pointerY = 0;
-    let frame = 0;
-    const clock = new THREE.Clock();
-
-    const resize = () => {
-      const width = mount.clientWidth;
-      const height = mount.clientHeight;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height, false);
-    };
-
-    const handlePointerMove = (event) => {
-      const bounds = mount.getBoundingClientRect();
-      pointerX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 0.7;
-      pointerY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 0.5;
-    };
-
-    const animate = () => {
-      const elapsed = clock.getElapsedTime();
-
-      crystal.rotation.y += 0.006;
-      crystal.rotation.x = 0.32 + Math.sin(elapsed * 0.9) * 0.05;
-      orbit.rotation.y -= 0.01;
-      orbit.rotation.z = Math.sin(elapsed * 0.55) * 0.08;
-      group.rotation.y += (pointerX - group.rotation.y) * 0.045;
-      group.rotation.x += (-pointerY - group.rotation.x) * 0.045;
-      keyLight.position.x = 2.7 + Math.sin(elapsed) * 0.5;
-
-      orbitStones.forEach((stone, index) => {
-        stone.rotation.x += 0.012 + index * 0.0008;
-        stone.rotation.y += 0.01;
-      });
-
-      renderer.render(scene, camera);
-      frame = requestAnimationFrame(animate);
-    };
-
-    resize();
-    animate();
-    mount.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("resize", resize);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      mount.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("resize", resize);
-      mount.removeChild(renderer.domElement);
-      renderer.dispose();
-      crystal.geometry.dispose();
-      crystalMaterial.dispose();
-      ring.geometry.dispose();
-      accentMaterial.dispose();
-      stoneGeometry.dispose();
-      stoneMaterials.forEach((material) => material.dispose());
-      base.geometry.dispose();
-      base.material.dispose();
-    };
-  }, [activeMode.color]);
-
-  useEffect(() => {
-    const mount = mountRef.current;
-    const canvas = mount?.querySelector("canvas");
-
-    if (canvas) {
-      canvas.dataset.mode = activeMode.name;
-    }
-  }, [activeMode.name]);
-
-  return (
-    <div
-      ref={mountRef}
-      className="three-crystal-showcase"
-      style={{ "--mode-color": activeMode.color }}
-      aria-label="Interactive 3D crystal and jewelry showcase"
-    />
-  );
-}
-
-function Navbar() {
+function Header() {
   const [open, setOpen] = useState(false);
 
   return (
     <header className="site-header">
-      <a href="#home" className="brand-mark" aria-label="Euphoria home">
-        <span className="brand-symbol">
-          <Gem size={22} />
+      <a className="brand-lockup" href="#home" aria-label="Midnight Meridian home">
+        <span className="brand-seal">
+          <Moon size={19} aria-hidden="true" />
         </span>
         <span>
-          <span className="brand-name">Euphoria</span>
-          <span className="brand-subtitle">Lincoln, NE</span>
+          <span className="brand-name">Midnight Meridian</span>
+          <span className="brand-line">Night train observatory</span>
         </span>
       </a>
 
@@ -350,9 +148,9 @@ function Navbar() {
         ))}
       </nav>
 
-      <a className="header-cta" href="#contact">
-        <MapPin size={18} />
-        4139 O St
+      <a className="header-action" href="#reserve">
+        <CalendarDays size={17} aria-hidden="true" />
+        Reserve
       </a>
 
       <button
@@ -362,7 +160,7 @@ function Navbar() {
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        {open ? <X size={22} /> : <Menu size={22} />}
+        {open ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
       </button>
 
       {open && (
@@ -372,8 +170,8 @@ function Navbar() {
               {label}
             </a>
           ))}
-          <a href="#contact" onClick={() => setOpen(false)}>
-            Visit 4139 O St
+          <a href="#reserve" onClick={() => setOpen(false)}>
+            Reserve
           </a>
         </nav>
       )}
@@ -381,284 +179,138 @@ function Navbar() {
   );
 }
 
-function HeroStillLife() {
-  return (
-    <div className="still-life" aria-label="Jewelry, crystals, beads, and gifts arranged on a boutique table">
-      <div className="tray">
-        <span className="ring ring-one" />
-        <span className="ring ring-two" />
-        <span className="crystal crystal-one" />
-        <span className="crystal crystal-two" />
-        <span className="bead-strand" />
-        <span className="pendant" />
-      </div>
-      <div className="shelf-card top-card">
-        <Sparkles size={18} />
-        <span>Crystals</span>
-      </div>
-      <div className="shelf-card bottom-card">
-        <Heart size={18} />
-        <span>Gifts</span>
-      </div>
-    </div>
-  );
-}
-
 function Hero() {
   return (
-    <section id="home" className="hero-section">
-      <div className="hero-copy">
-        <p className="eyebrow">
-          Eclectic jewelry and crystal shop on O Street
-        </p>
+    <section id="home" className="hero-section" aria-label="Midnight Meridian">
+      <img className="hero-image" src={heroImage} alt="" />
+      <div className="hero-scrim" aria-hidden="true" />
 
-        <h1>
-          <span>Jewelry,</span>
-          <span>crystals, and</span>
-          <span>curious gifts.</span>
-        </h1>
-
-        <p className="hero-lede">
-          A storefront-style website concept for Lincoln shoppers looking for jewelry, beads, crystals,
-          clothing, gifts, and small ritual goods with a personal, locally rooted feel.
-        </p>
-
-        <div className="hero-actions">
-          <a className="primary-button" href="#collections">
-            Browse collections
-            <ArrowRight size={18} />
-          </a>
-          <a className="secondary-button" href="#visit">
-            Plan a visit
-            <MapPin size={18} />
-          </a>
+      <div className="hero-inner">
+        <div className="hero-copy">
+          <p className="kicker">Luxury rail journeys beneath dark-sky routes</p>
+          <h1>Midnight Meridian</h1>
+          <p className="hero-lede">
+            A moving observatory where polished railcars, mountain air, and guided astronomy meet
+            for one unhurried night above the tree line.
+          </p>
+          <div className="hero-actions">
+            <a className="primary-button" href="#reserve">
+              Choose a departure
+              <ArrowRight size={18} aria-hidden="true" />
+            </a>
+            <a className="ghost-button" href="#cabins">
+              View cabins
+              <ChevronRight size={18} aria-hidden="true" />
+            </a>
+          </div>
         </div>
 
-        <div className="store-strip" aria-label="Store highlights">
-          {storeNotes.map((note) => (
-            <span key={note}>{note}</span>
-          ))}
-        </div>
-      </div>
-
-      <div className="hero-visual">
-        <HeroStillLife />
+        <aside className="hero-ledger" aria-label="Journey highlights">
+          <div>
+            <span>Guests</span>
+            <strong>24</strong>
+          </div>
+          <div>
+            <span>Route</span>
+            <strong>Alpine dark sky</strong>
+          </div>
+          <div>
+            <span>Salon</span>
+            <strong>Brass telescope</strong>
+          </div>
+        </aside>
       </div>
     </section>
   );
 }
 
-function Collections({ selectedCollection, setSelectedCollection, favorites, toggleFavorite }) {
+function Manifest() {
   return (
-    <section id="collections" className="section-wrap">
-      <Reveal>
-        <div className="section-heading">
-          <p className="eyebrow">Store preview</p>
-          <h2>Make the first click feel like walking in.</h2>
-          <p>
-            The page now frames Euphoria as a browsing destination, not just a generic jewelry store.
-            Each category gives visitors a reason to explore before they arrive.
-          </p>
-        </div>
-      </Reveal>
-
-      <div className="collection-grid">
-        {collections.map((item, index) => (
-          <Reveal key={item.title} delay={index * 90}>
-            <article
-              className={`collection-card ${selectedCollection.title === item.title ? "is-selected" : ""}`}
-            >
-              <div className={`gem-chip bg-gradient-to-br ${item.accent}`}>
-                <Sparkles size={22} />
-              </div>
-              <h3>{item.title}</h3>
-              <p>{item.detail}</p>
-              <div className="card-actions">
-                <button type="button" onClick={() => setSelectedCollection(item)}>
-                  Preview style
-                  <ChevronRight size={17} />
-                </button>
-                <button
-                  type="button"
-                  className="icon-action"
-                  aria-label={`${favorites.includes(item.title) ? "Remove" : "Save"} ${item.title}`}
-                  aria-pressed={favorites.includes(item.title)}
-                  onClick={() => toggleFavorite(item.title)}
-                >
-                  <Heart size={17} fill={favorites.includes(item.title) ? "currentColor" : "none"} />
-                </button>
-              </div>
-            </article>
-          </Reveal>
+    <section className="manifest-strip" aria-label="Journey sequence">
+      <div className="content-frame manifest-grid">
+        {manifest.map(([step, title, copy]) => (
+          <article className="manifest-item" key={title}>
+            <span>{step}</span>
+            <h2>{title}</h2>
+            <p>{copy}</p>
+          </article>
         ))}
       </div>
     </section>
   );
 }
 
-function Visit() {
-  const [activeMode, setActiveMode] = useState(visitModes[0]);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-
-  const handleTilt = (event) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 18;
-    const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * -18;
-
-    setTilt({ x, y });
-  };
-
+function RouteSection({ activeStop, setActiveStop }) {
   return (
-    <section id="visit" className="visit-section">
-      <div className="visit-panel">
+    <section id="route" className="route-section">
+      <div className="content-frame route-layout">
         <Reveal>
-          <div>
-            <p className="eyebrow">Visit the shop</p>
-            <h2>4139 O Street, Lincoln, Nebraska</h2>
+          <div className="section-copy">
+            <p className="kicker">The route</p>
+            <h2>A night plotted by altitude, not hurry.</h2>
             <p>
-              The preview gives the storefront practical details and a stronger sense of place.
-              Visitors can quickly see where the shop is, what kind of browsing to expect, and why
-              it feels different from a standard mall jewelry counter.
+              Midnight Meridian climbs slowly so the sky changes with the landscape. Each stop is
+              chosen for clear air, quiet platforms, and enough time to look properly.
             </p>
           </div>
         </Reveal>
 
-        <div className="visit-details">
-          {[
-            [Store, "Independent local storefront"],
-            [Clock, "Hours can be connected from Google Business Profile"],
-            [Phone, "Phone and booking links can be added when confirmed"],
-          ].map(([Icon, label], index) => (
-            <Reveal key={label} delay={index * 100}>
-              <div>
-                <Icon size={20} />
-                <span>{label}</span>
-              </div>
+        <div className="route-board" aria-label="Route stops">
+          {routeStops.map((stop, index) => (
+            <Reveal key={stop.name} delay={index * 90}>
+              <button
+                type="button"
+                className={activeStop.name === stop.name ? "route-stop is-active" : "route-stop"}
+                style={{ "--accent": stop.accent }}
+                onClick={() => setActiveStop(stop)}
+              >
+                <span className="stop-number">{String(index + 1).padStart(2, "0")}</span>
+                <span>
+                  <strong>{stop.name}</strong>
+                  <small>{stop.altitude}</small>
+                </span>
+              </button>
             </Reveal>
           ))}
         </div>
-
-        <Reveal className="visit-immersive" delay={140}>
-          <div className="visit-3d-card">
-            <div>
-              <p className="eyebrow">Interactive visit planner</p>
-              <h3>{activeMode.label}</h3>
-              <p>{activeMode.copy}</p>
-            </div>
-
-            <div
-              className="crystal-stage"
-              onPointerMove={handleTilt}
-              onPointerLeave={() => setTilt({ x: 0, y: 0 })}
-              style={{
-                "--tilt-x": `${tilt.y}deg`,
-                "--tilt-y": `${tilt.x}deg`,
-                "--mode-color": activeMode.color,
-              }}
-            >
-              <ThreeCrystalShowcase activeMode={activeMode} />
-              <div className="stage-badges" aria-hidden="true">
-                <span>WebGL</span>
-                <span>Drag light</span>
-              </div>
-            </div>
-
-            <div className="mode-controls" aria-label="Visit mode selector">
-              {visitModes.map((mode) => (
-                <button
-                  key={mode.name}
-                  type="button"
-                  className={activeMode.name === mode.name ? "is-active" : ""}
-                  onClick={() => setActiveMode(mode)}
-                >
-                  {mode.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </Reveal>
       </div>
     </section>
   );
 }
 
-function Preview({ selectedCollection, setSelectedCollection, favorites, query, setQuery }) {
-  const normalizedQuery = query.trim().toLowerCase();
-  const matches = collections.filter((item) => {
-    const searchTarget = [item.title, item.detail, ...item.tags].join(" ").toLowerCase();
-    return !normalizedQuery || searchTarget.includes(normalizedQuery);
-  });
-
+function CabinsSection() {
   return (
-    <section id="preview" className="preview-section">
-      <Reveal>
-        <div className="preview-copy">
-          <p className="eyebrow">Website direction</p>
-          <h2>Less template, more treasure hunt.</h2>
-          <p>
-            The new layout uses tactile color, tighter hierarchy, clearer calls to action, and
-            collection previews that feel more like Euphoria: curious, layered, and local.
-          </p>
-          <label className="search-preview">
-            <Search size={19} />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search jewelry, crystals, beads, incense..."
-              aria-label="Search Euphoria collections"
-            />
-          </label>
-          <div className="feature-panel">
-            <div>
-              <p className="feature-kicker">Currently previewing</p>
-              <h3>{selectedCollection.title}</h3>
-              <p>{selectedCollection.detail}</p>
-            </div>
-            <div className="tag-row">
-              {selectedCollection.tags.map((tag) => (
-                <button key={tag} type="button" onClick={() => setQuery(tag)}>
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
-      <div className="interactive-stack">
+    <section id="cabins" className="cabins-section">
+      <div className="content-frame">
         <Reveal>
-          <div className="match-panel">
-            <div className="match-header">
-              <span>{matches.length} match{matches.length === 1 ? "" : "es"}</span>
-              {favorites.length > 0 && <span>{favorites.length} saved</span>}
-            </div>
-            <div className="match-list">
-              {matches.map((item) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  className={selectedCollection.title === item.title ? "is-active" : ""}
-                  onClick={() => setSelectedCollection(item)}
-                >
-                  <span>{item.title}</span>
-                  <small>{item.tags.slice(0, 3).join(" / ")}</small>
-                </button>
-              ))}
-            </div>
+          <div className="section-copy centered-copy">
+            <p className="kicker">Cabins</p>
+            <h2>Rooms designed around the window.</h2>
+            <p>
+              Every berth is quiet, compact, and deliberately low-lit, with tactile details that
+              belong to rail travel instead of a hotel lobby.
+            </p>
           </div>
         </Reveal>
 
-        <div className="review-grid">
-          {reviews.map((review, index) => (
-            <Reveal key={review} delay={index * 100}>
-              <article className="review-card">
-                <div className="stars" aria-label="Five star preview">
-                  {Array.from({ length: 5 }).map((_, starIndex) => (
-                    <Star key={starIndex} size={15} fill="currentColor" />
-                  ))}
+        <div className="cabin-grid">
+          {cabinTypes.map((cabin, index) => (
+            <Reveal key={cabin.name} delay={index * 90}>
+              <article className="cabin-card">
+                <div className="cabin-topline">
+                  <Sparkles size={18} aria-hidden="true" />
+                  <span>{cabin.capacity}</span>
                 </div>
-                <p>{review}</p>
-                <span>Preview note {index + 1}</span>
+                <h3>{cabin.name}</h3>
+                <p>{cabin.copy}</p>
+                <ul>
+                  {cabin.details.map((detail) => (
+                    <li key={detail}>
+                      <Star size={14} aria-hidden="true" />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
               </article>
             </Reveal>
           ))}
@@ -668,29 +320,270 @@ function Preview({ selectedCollection, setSelectedCollection, favorites, query, 
   );
 }
 
-function Contact() {
-  return (
-    <section id="contact" className="contact-section">
-      <Reveal>
-        <div>
-          <p className="eyebrow">Next step</p>
-          <h2>Ready for real photos, hours, and inventory.</h2>
-          <p>
-            This is a polished preview foundation. It can become a live store page once official
-            photos, confirmed contact details, hours, and owner-approved copy are added.
-          </p>
-        </div>
-      </Reveal>
+function StarAtlas({ activeStop }) {
+  const mountRef = useRef(null);
 
-      <div className="contact-actions">
-        <a className="primary-button" href="https://www.google.com/maps/place/Euphoria/@40.8131297,-96.6638209,17z/data=!4m15!1m8!3m7!1s0x8796bc299f12830d:0x3b4bb58ee18fcceb!2sEuphoria!8m2!3d40.8131257!4d-96.661246!10e1!16s%2Fg%2F1tdq1mts!3m5!1s0x8796bc299f12830d:0x3b4bb58ee18fcceb!8m2!3d40.8131257!4d-96.661246!16s%2Fg%2F1tdq1mts?hl=en&entry=ttu&g_ep=EgoyMDI2MDUyNy4wIKXMDSoASAFQAw%3D%3D">
-          Open map
-          <MapPin size={18} />
-        </a>
-        <a className="secondary-button" href="#collections">
-          View collections
-          <ShoppingBag size={18} />
-        </a>
+  useEffect(() => {
+    const mount = mountRef.current;
+
+    if (!mount) {
+      return undefined;
+    }
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    camera.position.set(0, 0, 8.4);
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    mount.appendChild(renderer.domElement);
+
+    const atlasGroup = new THREE.Group();
+    scene.add(atlasGroup);
+
+    const starGeometry = new THREE.BufferGeometry();
+    const starPositions = [];
+    const starColors = [];
+
+    for (let index = 0; index < 900; index += 1) {
+      const radius = 3.5 + Math.random() * 5.5;
+      const angle = Math.random() * Math.PI * 2;
+      const height = (Math.random() - 0.5) * 5.2;
+      starPositions.push(Math.cos(angle) * radius, height, Math.sin(angle) * radius - 1.2);
+
+      const warmth = Math.random();
+      starColors.push(0.8 + warmth * 0.2, 0.82 + warmth * 0.13, 0.92 + warmth * 0.08);
+    }
+
+    starGeometry.setAttribute("position", new THREE.Float32BufferAttribute(starPositions, 3));
+    starGeometry.setAttribute("color", new THREE.Float32BufferAttribute(starColors, 3));
+
+    const starMaterial = new THREE.PointsMaterial({
+      size: 0.026,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.92,
+      depthWrite: false,
+    });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    atlasGroup.add(stars);
+
+    const routePoints = routeStops.map((stop) => new THREE.Vector3(stop.x, stop.y, 0.25));
+    const curve = new THREE.CatmullRomCurve3(routePoints);
+    const routeGeometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(96));
+    const routeMaterial = new THREE.LineBasicMaterial({
+      color: new THREE.Color(activeStop.accent),
+      transparent: true,
+      opacity: 0.94,
+    });
+    const routeLine = new THREE.Line(routeGeometry, routeMaterial);
+    atlasGroup.add(routeLine);
+
+    const markerGeometry = new THREE.SphereGeometry(0.085, 24, 24);
+    const markerMaterials = routeStops.map((stop) => (
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(stop.accent) })
+    ));
+    const markers = routeStops.map((stop, index) => {
+      const marker = new THREE.Mesh(markerGeometry, markerMaterials[index]);
+      marker.position.set(stop.x, stop.y, 0.25);
+      atlasGroup.add(marker);
+      return marker;
+    });
+
+    const trainLight = new THREE.Mesh(
+      new THREE.SphereGeometry(0.13, 32, 32),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(activeStop.accent) }),
+    );
+    atlasGroup.add(trainLight);
+
+    const horizonGeometry = new THREE.RingGeometry(2.4, 2.44, 160);
+    const horizonMaterial = new THREE.MeshBasicMaterial({
+      color: 0xd7ae63,
+      transparent: true,
+      opacity: 0.18,
+      side: THREE.DoubleSide,
+    });
+    const horizon = new THREE.Mesh(horizonGeometry, horizonMaterial);
+    horizon.rotation.x = Math.PI / 2.3;
+    horizon.position.y = -1.95;
+    atlasGroup.add(horizon);
+
+    let pointerX = 0;
+    let pointerY = 0;
+    let frame = 0;
+    const clock = new THREE.Clock();
+
+    const resize = () => {
+      const { clientWidth, clientHeight } = mount;
+      renderer.setSize(clientWidth, clientHeight, false);
+      camera.aspect = clientWidth / clientHeight;
+      camera.updateProjectionMatrix();
+    };
+
+    const handlePointerMove = (event) => {
+      const bounds = mount.getBoundingClientRect();
+      pointerX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 0.45;
+      pointerY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 0.28;
+    };
+
+    const render = () => {
+      const elapsed = clock.getElapsedTime();
+      const routePosition = curve.getPoint((elapsed * 0.055) % 1);
+
+      trainLight.position.copy(routePosition);
+      stars.rotation.y += prefersReducedMotion ? 0 : 0.0009;
+      atlasGroup.rotation.y += (pointerX - atlasGroup.rotation.y) * 0.035;
+      atlasGroup.rotation.x += (-pointerY - atlasGroup.rotation.x) * 0.035;
+
+      markers.forEach((marker, index) => {
+        const pulse = prefersReducedMotion ? 1 : 1 + Math.sin(elapsed * 2 + index) * 0.18;
+        marker.scale.setScalar(routeStops[index].name === activeStop.name ? 1.7 * pulse : 1 * pulse);
+      });
+
+      renderer.render(scene, camera);
+
+      if (!prefersReducedMotion) {
+        frame = requestAnimationFrame(render);
+      }
+    };
+
+    resize();
+    render();
+    mount.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("resize", resize);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      mount.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("resize", resize);
+
+      if (renderer.domElement.parentNode === mount) {
+        mount.removeChild(renderer.domElement);
+      }
+
+      starGeometry.dispose();
+      starMaterial.dispose();
+      routeGeometry.dispose();
+      routeMaterial.dispose();
+      markerGeometry.dispose();
+      markerMaterials.forEach((material) => material.dispose());
+      trainLight.geometry.dispose();
+      trainLight.material.dispose();
+      horizonGeometry.dispose();
+      horizonMaterial.dispose();
+      renderer.dispose();
+    };
+  }, [activeStop]);
+
+  return <div ref={mountRef} className="star-atlas-canvas" aria-hidden="true" />;
+}
+
+function AtlasSection({ activeStop, setActiveStop }) {
+  return (
+    <section id="atlas" className="atlas-section">
+      <StarAtlas activeStop={activeStop} />
+      <div className="atlas-shade" aria-hidden="true" />
+      <div className="content-frame atlas-content">
+        <Reveal>
+          <div className="atlas-copy">
+            <p className="kicker">Live atlas</p>
+            <h2>{activeStop.name}</h2>
+            <p>{activeStop.detail}</p>
+            <div className="atlas-meta">
+              <span>{activeStop.altitude}</span>
+              <span>Dark-sky window</span>
+            </div>
+          </div>
+        </Reveal>
+
+        <div className="atlas-controls" aria-label="Choose route stop">
+          {routeStops.map((stop) => (
+            <button
+              key={stop.name}
+              type="button"
+              className={activeStop.name === stop.name ? "is-active" : ""}
+              style={{ "--accent": stop.accent }}
+              onClick={() => setActiveStop(stop)}
+            >
+              {stop.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ReserveSection() {
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setSent(true);
+  };
+
+  return (
+    <section id="reserve" className="reserve-section">
+      <div className="content-frame reserve-layout">
+        <Reveal>
+          <div className="section-copy">
+            <p className="kicker">Reserve</p>
+            <h2>Send a signal for the next dark window.</h2>
+            <p>
+              Select a departure mood and party size. The concierge prepares a route note, cabin
+              recommendation, and sky conditions brief before any booking is confirmed.
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal delay={120}>
+          <form className="reservation-form" onSubmit={handleSubmit}>
+            <label>
+              Departure
+              <select defaultValue={departures[0]}>
+                {departures.map((departure) => (
+                  <option key={departure}>{departure}</option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Party size
+              <input type="number" min="1" max="24" defaultValue="2" />
+            </label>
+
+            <label>
+              Cabin preference
+              <select defaultValue={cabinTypes[0].name}>
+                {cabinTypes.map((cabin) => (
+                  <option key={cabin.name}>{cabin.name}</option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Contact
+              <input type="email" placeholder="you@example.com" required />
+            </label>
+
+            <button className="primary-button signal-button" type="submit">
+              Send request
+              <Send size={18} aria-hidden="true" />
+            </button>
+
+            {sent && (
+              <p className="form-status" role="status">
+                Signal received. A boarding brief is ready for the next conversation.
+              </p>
+            )}
+          </form>
+        </Reveal>
       </div>
     </section>
   );
@@ -698,63 +591,53 @@ function Contact() {
 
 function Footer() {
   return (
-    <footer className="footer">
-      <div>
-        <Gem size={22} />
-        <span>Euphoria preview website</span>
+    <footer className="site-footer">
+      <div className="content-frame footer-inner">
+        <a className="brand-lockup" href="#home" aria-label="Midnight Meridian home">
+          <span className="brand-seal">
+            <Moon size={19} aria-hidden="true" />
+          </span>
+          <span>
+            <span className="brand-name">Midnight Meridian</span>
+            <span className="brand-line">Night train observatory</span>
+          </span>
+        </a>
+        <div className="footer-links">
+          <a href="#route">Route</a>
+          <a href="#cabins">Cabins</a>
+          <a href="#atlas">Atlas</a>
+          <a href="#reserve">Reserve</a>
+        </div>
       </div>
-      <p>Concept site for the Lincoln, Nebraska storefront. Replace preview content with verified owner details before publishing.</p>
     </footer>
   );
 }
 
 export default function App() {
-  const [selectedCollection, setSelectedCollection] = useState(collections[0]);
-  const [favorites, setFavorites] = useState([]);
-  const [query, setQuery] = useState("");
+  const [activeStop, setActiveStop] = useState(routeStops[1]);
 
   useEffect(() => {
     if (!window.location.hash) {
       return undefined;
     }
 
-    const target = document.querySelector(window.location.hash);
-    const scrollTimer = window.setTimeout(() => {
-      target?.scrollIntoView({ block: "start" });
-    }, 120);
+    const timer = window.setTimeout(() => {
+      document.querySelector(window.location.hash)?.scrollIntoView({ block: "start" });
+    }, 80);
 
-    return () => window.clearTimeout(scrollTimer);
+    return () => window.clearTimeout(timer);
   }, []);
-
-  const toggleFavorite = (title) => {
-    setFavorites((current) => (
-      current.includes(title)
-        ? current.filter((item) => item !== title)
-        : [...current, title]
-    ));
-  };
 
   return (
     <div className="site-shell">
-      <AmbientBackground />
-      <Navbar />
+      <Header />
       <main>
         <Hero />
-        <Collections
-          selectedCollection={selectedCollection}
-          setSelectedCollection={setSelectedCollection}
-          favorites={favorites}
-          toggleFavorite={toggleFavorite}
-        />
-        <Visit />
-        <Preview
-          selectedCollection={selectedCollection}
-          setSelectedCollection={setSelectedCollection}
-          favorites={favorites}
-          query={query}
-          setQuery={setQuery}
-        />
-        <Contact />
+        <Manifest />
+        <RouteSection activeStop={activeStop} setActiveStop={setActiveStop} />
+        <CabinsSection />
+        <AtlasSection activeStop={activeStop} setActiveStop={setActiveStop} />
+        <ReserveSection />
       </main>
       <Footer />
     </div>
